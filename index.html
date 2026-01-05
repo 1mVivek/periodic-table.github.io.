@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>✨ Premium Interactive Periodic Table (118 Elements) ✨</title>
+<style>
+    * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+    }
+    body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #0b0c1f 0%, #1f2350 50%, #0f1a2e 100%);
+        color: #fff;
+        padding: 20px;
+        overflow-x: auto;
+        min-height: 100vh;
+        perspective: 1200px;
+    }
+    h1 {
+        text-align: center;
+        font-size: 2.8em;
+        margin-bottom: 10px;
+        background: linear-gradient(135deg, #64c8ff, #a89aff, #ff85c0);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        text-shadow: 0 0 30px rgba(100, 200, 255, 0.5);
+        font-weight: 800;
+        letter-spacing: 2px;
+    }
+    .subtitle {
+        text-align: center;
+        font-size: 0.95em;
+        color: rgba(255,255,255,0.6);
+        margin-bottom: 25px;
+    }
+
+    .search-box {
+        text-align: center;
+        margin-bottom: 30px;
+        position: relative;
+    }
+    .search-box input {
+        padding: 15px 25px;
+        font-size: 1.05em;
+        width: 380px;
+        max-width: 90%;
+        border: 2px solid rgba(100, 200, 255, 0.4);
+        border-radius: 50px;
+        outline: none;
+        background: rgba(15, 26, 46, 0.8);
+        color: white;
+        backdrop-filter: blur(10px);
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 8px 32px rgba(100, 200, 255, 0.1), inset 0 1px 0 rgba(255,255,255,0.1);
+    }
+    .search-box input:focus {
+        border-color: #64c8ff;
+        box-shadow: 0 0 30px rgba(100,200,255,0.6), inset 0 1px 0 rgba(255,255,255,0.2);
+        transform: scale(1.05);
+    }
+    .search-box input::placeholder {
+        color: rgba(255,255,255,0.5);
+    }
+
+    .periodic-table {
+        display: grid;
+        grid-template-columns: repeat(18, minmax(50px, 1fr));
+        gap: 5px;
+        justify-items: stretch;
+        margin: 0 auto;
+        max-width: 1600px;
+        padding: 20px;
+        background: rgba(255,255,255,0.02);
+        border-radius: 20px;
+        border: 1px solid rgba(100, 200, 255, 0.1);
+        backdrop-filter: blur(5px);
+        transition: all 0.3s ease;
+    }
+
+    .element {
+        border: 2px solid rgba(255, 255, 255, 0.1);
+        border-radius: 12px;
+        padding: 6px;
+        aspect-ratio: 1;
+        text-align: center;
+        font-size: 0.75em;
+        position: relative;
+        cursor: pointer;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        overflow: hidden;
+        transform-style: preserve-3d;
+        background-size: 200% 200%;
+    }
+
+    /* Premium 3D Effect */
+    .element::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: linear-gradient(45deg, transparent, rgba(255,255,255,0.15), transparent);
+        transform: rotate(45deg);
+        opacity: 0;
+        transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .element::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        border-radius: 12px;
+        background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, transparent 50%, rgba(0,0,0,0.1) 100%);
+        opacity: 0;
+        transition: opacity 0.4s ease;
+    }
+
+    .element:hover::before {
+        animation: premiumShine 0.6s ease-in-out;
+        opacity: 1;
+    }
+
+    .element:hover::after {
+        opacity: 1;
+    }
+
+    @keyframes premiumShine {
+        0% {
+            transform: translateX(-100%) translateY(-100%) rotate(45deg);
+        }
+        100% {
+            transform: translateX(100%) translateY(100%) rotate(45deg);
+        }
+    }
+
+    /* Active state: Exact match only */
+    .element.active {
+        transform: translateZ(20px) scale(1.15);
+        z-index: 100;
+        box-shadow: 
+            0 20px 60px rgba(0,0,0,0.4),
+            0 0 40px currentColor,
+            inset 0 1px 0 rgba(255,255,255,0.3);
+        border-color: currentColor;
+        animation: pulseActive 0.6s ease-out;
+    }
+
+    @keyframes pulseActive {
+        0% {
+            box-shadow: 
+                0 20px 60px rgba(0,0,0,0.4),
+                0 0 60px currentColor,
+                inset 0 1px 0 rgba(255,255,255,0.3);
+        }
+        100% {
+            box-shadow: 
+                0 20px 60px rgba(0,0,0,0.4),
+                0 0 40px currentColor,
+                inset 0 1px 0 rgba(255,255,255,0.3);
+        }
+    }
+
+    /* Hover state for non-active elements */
+    .element:hover:not(.active) {
+        transform: translateZ(10px) scale(1.08);
+        box-shadow: 
+            0 12px 32px rgba(0,0,0,0.3),
+            0 0 20px rgba(255,255,255,0.1);
+        border-color: rgba(255,255,255,0.3);
+    }
+
+    /* Dimmed state when searching */
+    .element.dimmed {
+        opacity: 0.15;
+        transform: scale(0.95);
+        pointer-events: none;
+    }
+
+    .element .symbol {
+        font-size: 1.3em;
+        font-weight: bold;
+        margin: 2px 0;
+        transition: all 0.3s ease;
+    }
+    .element.active .symbol {
+        font-size: 1.5em;
+        text-shadow: 0 0 10px currentColor;
+    }
+
+    .element .atomic-number {
+        font-size: 0.65em;
+        opacity: 0.8;
+        position: absolute;
+        top: 4px;
+        left: 4px;
+        font-weight: bold;
+    }
+    .element .name {
+        font-size: 0.55em;
+        opacity: 0.85;
+        margin-top: 1px;
+        transition: all 0.3s ease;
+    }
+    .element.active .name {
+        font-size: 0.65em;
+        opacity: 1;
+    }
+
+    .empty {
+        background: transparent;
+        border: none;
+        pointer-events: none;
+    }
+
+    /* Element Categories - Premium Gradients */
+    .alkali { 
+        background: linear-gradient(135deg, rgba(255, 85, 85, 0.4), rgba(255, 102, 102, 0.25)); 
+        color: #ffb3b3; 
+        border-color: rgba(255, 102, 102, 0.3);
+    }
+    .alkali:hover { box-shadow: 0 0 20px rgba(255, 102, 102, 0.4); }
+
+    .alkaline { 
+        background: linear-gradient(135deg, rgba(255, 165, 85, 0.4), rgba(255, 178, 102, 0.25)); 
+        color: #ffd9b3;
+        border-color: rgba(255, 165, 85, 0.3);
+    }
+    .alkaline:hover { box-shadow: 0 0 20px rgba(255, 165, 85, 0.4); }
+
+    .transition { 
+        background: linear-gradient(135deg, rgba(255, 190, 120, 0.4), rgba(255, 204, 153, 0.25)); 
+        color: #ffe0cc;
+        border-color: rgba(255, 190, 120, 0.3);
+    }
+    .transition:hover { box-shadow: 0 0 20px rgba(255, 190, 120, 0.4); }
+
+    .post-transition { 
+        background: linear-gradient(135deg, rgba(190, 190, 190, 0.4), rgba(204, 204, 204, 0.25)); 
+        color: #efefef;
+        border-color: rgba(190, 190, 190, 0.3);
+    }
+    .post-transition:hover { box-shadow: 0 0 20px rgba(190, 190, 190, 0.3); }
+
+    .metalloid { 
+        background: linear-gradient(135deg, rgba(190, 190, 130, 0.4), rgba(204, 204, 153, 0.25)); 
+        color: #ececd2;
+        border-color: rgba(190, 190, 130, 0.3);
+    }
+    .metalloid:hover { box-shadow: 0 0 20px rgba(190, 190, 130, 0.3); }
+
+    .nonmetal { 
+        background: linear-gradient(135deg, rgba(85, 255, 85, 0.4), rgba(102, 255, 102, 0.25)); 
+        color: #ccffcc;
+        border-color: rgba(85, 255, 85, 0.3);
+    }
+    .nonmetal:hover { box-shadow: 0 0 20px rgba(85, 255, 85, 0.4); }
+
+    .halogen { 
+        background: linear-gradient(135deg, rgba(255, 255, 85, 0.4), rgba(255, 255, 102, 0.25)); 
+        color: #ffffcc;
+        border-color: rgba(255, 255, 85, 0.3);
+    }
+    .halogen:hover { box-shadow: 0 0 20px rgba(255, 255, 85, 0.4); }
+
+    .noble { 
+        background: linear-gradient(135deg, rgba(130, 190, 255, 0.4), rgba(153, 204, 255, 0.25)); 
+        color: #d6e8ff;
+        border-color: rgba(130, 190, 255, 0.3);
+    }
+    .noble:hover { box-shadow: 0 0 20px rgba(130, 190, 255, 0.4); }
+
+    .lanthanide { 
+        background: linear-gradient(135deg, rgba(255, 190, 255, 0.4), rgba(255, 204, 255, 0.25)); 
+        color: #ffe6ff;
+        border-color: rgba(255, 190, 255, 0.3);
+    }
+    .lanthanide:hover { box-shadow: 0 0 20px rgba(255, 190, 255, 0.4); }
+
+    .actinide { 
+        background: linear-gradient(135deg, rgba(255, 140, 190, 0.4), rgba(255, 153, 204, 0.25)); 
+        color: #ffcce5;
+        border-color: rgba(255, 140, 190, 0.3);
+    }
+    .actinide:hover { box-shadow: 0 0 20px rgba(255, 140, 190, 0.4); }
+
+    .info-panel {
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.08), rgba(100, 200, 255, 0.05));
+        backdrop-filter: blur(20px);
+        padding: 30px;
+        border-radius: 20px;
+        margin-top: 30px;
+        text-align: center;
+        border: 2px solid rgba(100, 200, 255, 0.2);
+        box-shadow: 0 8px 32px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.1);
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        min-height: 140px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+    .info-panel h2 { 
+        color: #64c8ff; 
+        margin-bottom: 12px;
+        font-size: 1.6em;
+        text-shadow: 0 0 20px rgba(100, 200, 255, 0.4);
+    }
+    .info-panel p {
+        margin: 6px 0;
+        opacity: 0.95;
+        font-size: 1.02em;
+    }
+    .info-panel .highlight {
+        color: #64c8ff;
+        font-weight: 600;
+    }
+
+    .legend {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+        gap: 12px;
+        margin-top: 30px;
+        padding: 20px;
+        background: rgba(255,255,255,0.02);
+        border-radius: 15px;
+        border: 1px solid rgba(100, 200, 255, 0.1);
+    }
+
+    .legend-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        color: white;
+        font-size: 0.95em;
+        padding: 8px 12px;
+        border-radius: 10px;
+        transition: all 0.3s ease;
+    }
+
+    .legend-item:hover {
+        background: rgba(100, 200, 255, 0.1);
+        transform: translateX(5px);
+    }
+
+    .legend-color {
+        width: 32px;
+        height: 32px;
+        border-radius: 8px;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    }
+
+    @media (max-width: 768px) {
+        h1 { font-size: 1.9em; }
+        .periodic-table { 
+            grid-template-columns: repeat(9, 1fr);
+            gap: 3px;
+        }
+        .element { font-size: 0.65em; }
+        .search-box input { width: 95%; }
+    }
+</style>
+</head>
+<body>
+
+<h1>✨ PREMIUM Periodic Table ✨</h1>
+<div class="subtitle">118 Elements • 3D Effect • Premium Search Experience</div>
+
+<div class="search-box">
+    <input type="text" id="search" placeholder="🔍 Search Gold, Au, Hydrogen, H...">
+</div>
+
+<div class="periodic-table" id="table"></div>
+
+<div class="info-panel" id="info">
+    <h2>⚛️ Explore the Elements</h2>
+    <p>Search to highlight a specific element • Hover to preview details • Click to copy</p>
+</div>
+
+<div class="legend">
+    <div class="legend-item"><div class="legend-color" style="background: linear-gradient(135deg, rgba(255, 85, 85, 0.4), rgba(255, 102, 102, 0.25));"></div> Alkali Metals</div>
+    <div class="legend-item"><div class="legend-color" style="background: linear-gradient(135deg, rgba(255, 165, 85, 0.4), rgba(255, 178, 102, 0.25));"></div> Alkaline Earth</div>
+    <div class="legend-item"><div class="legend-color" style="background: linear-gradient(135deg, rgba(255, 190, 120, 0.4), rgba(255, 204, 153, 0.25));"></div> Transition Metals</div>
+    <div class="legend-item"><div class="legend-color" style="background: linear-gradient(135deg, rgba(190, 190, 190, 0.4), rgba(204, 204, 204, 0.25));"></div> Post-transition</div>
+    <div class="legend-item"><div class="legend-color" style="background: linear-gradient(135deg, rgba(190, 190, 130, 0.4), rgba(204, 204, 153, 0.25));"></div> Metalloids</div>
+    <div class="legend-item"><div class="legend-color" style="background: linear-gradient(135deg, rgba(85, 255, 85, 0.4), rgba(102, 255, 102, 0.25));"></div> Nonmetals</div>
+    <div class="legend-item"><div class="legend-color" style="background: linear-gradient(135deg, rgba(255, 255, 85, 0.4), rgba(255, 255, 102, 0.25));"></div> Halogens</div>
+    <div class="legend-item"><div class="legend-color" style="background: linear-gradient(135deg, rgba(130, 190, 255, 0.4), rgba(153, 204, 255, 0.25));"></div> Noble Gases</div>
+    <div class="legend-item"><div class="legend-color" style="background: linear-gradient(135deg, rgba(255, 190, 255, 0.4), rgba(255, 204, 255, 0.25));"></div> Lanthanides</div>
+    <div class="legend-item"><div class="legend-color" style="background: linear-gradient(135deg, rgba(255, 140, 190, 0.4), rgba(255, 153, 204, 0.25));"></div> Actinides</div>
+</div>
+
+<script>
+const elements = [
+    {n:1,s:"H",name:"Hydrogen",m:1.008,cat:"nonmetal",pos:1},
+    {n:2,s:"He",name:"Helium",m:4.0026,cat:"noble",pos:18},
+    {n:3,s:"Li",name:"Lithium",m:6.94,cat:"alkali",pos:19},
+    {n:4,s:"Be",name:"Beryllium",m:9.012,cat:"alkaline",pos:20},
+    {n:5,s:"B",name:"Boron",m:10.81,cat:"metalloid",pos:31},
+    {n:6,s:"C",name:"Carbon",m:12.01,cat:"nonmetal",pos:32},
+    {n:7,s:"N",name:"Nitrogen",m:14.007,cat:"nonmetal",pos:33},
+    {n:8,s:"O",name:"Oxygen",m:15.999,cat:"nonmetal",pos:34},
+    {n:9,s:"F",name:"Fluorine",m:18.998,cat:"halogen",pos:35},
+    {n:10,s:"Ne",name:"Neon",m:20.18,cat:"noble",pos:36},
+    {n:11,s:"Na",name:"Sodium",m:22.99,cat:"alkali",pos:37},
+    {n:12,s:"Mg",name:"Magnesium",m:24.305,cat:"alkaline",pos:38},
+    {n:13,s:"Al",name:"Aluminum",m:26.982,cat:"post-transition",pos:49},
+    {n:14,s:"Si",name:"Silicon",m:28.085,cat:"metalloid",pos:50},
+    {n:15,s:"P",name:"Phosphorus",m:30.974,cat:"nonmetal",pos:51},
+    {n:16,s:"S",name:"Sulfur",m:32.06,cat:"nonmetal",pos:52},
+    {n:17,s:"Cl",name:"Chlorine",m:35.45,cat:"halogen",pos:53},
+    {n:18,s:"Ar",name:"Argon",m:39.948,cat:"noble",pos:54},
+    {n:19,s:"K",name:"Potassium",m:39.098,cat:"alkali",pos:55},
+    {n:20,s:"Ca",name:"Calcium",m:40.078,cat:"alkaline",pos:56},
+    {n:21,s:"Sc",name:"Scandium",m:44.956,cat:"transition",pos:57},
+    {n:22,s:"Ti",name:"Titanium",m:47.867,cat:"transition",pos:58},
+    {n:23,s:"V",name:"Vanadium",m:50.942,cat:"transition",pos:59},
+    {n:24,s:"Cr",name:"Chromium",m:51.996,cat:"transition",pos:60},
+    {n:25,s:"Mn",name:"Manganese",m:54.938,cat:"transition",pos:61},
+    {n:26,s:"Fe",name:"Iron",m:55.845,cat:"transition",pos:62},
+    {n:27,s:"Co",name:"Cobalt",m:58.933,cat:"transition",pos:63},
+    {n:28,s:"Ni",name:"Nickel",m:58.693,cat:"transition",pos:64},
+    {n:29,s:"Cu",name:"Copper",m:63.546,cat:"transition",pos:65},
+    {n:30,s:"Zn",name:"Zinc",m:65.38,cat:"transition",pos:66},
+    {n:31,s:"Ga",name:"Gallium",m:69.723,cat:"post-transition",pos:67},
+    {n:32,s:"Ge",name:"Germanium",m:72.63,cat:"metalloid",pos:68},
+    {n:33,s:"As",name:"Arsenic",m:74.922,cat:"metalloid",pos:69},
+    {n:34,s:"Se",name:"Selenium",m:78.97,cat:"nonmetal",pos:70},
+    {n:35,s:"Br",name:"Bromine",m:79.904,cat:"halogen",pos:71},
+    {n:36,s:"Kr",name:"Krypton",m:83.798,cat:"noble",pos:72},
+    {n:37,s:"Rb",name:"Rubidium",m:85.468,cat:"alkali",pos:73},
+    {n:38,s:"Sr",name:"Strontium",m:87.62,cat:"alkaline",pos:74},
+    {n:39,s:"Y",name:"Yttrium",m:88.906,cat:"transition",pos:75},
+    {n:40,s:"Zr",name:"Zirconium",m:91.224,cat:"transition",pos:76},
+    {n:41,s:"Nb",name:"Niobium",m:92.906,cat:"transition",pos:77},
+    {n:42,s:"Mo",name:"Molybdenum",m:95.95,cat:"transition",pos:78},
+    {n:43,s:"Tc",name:"Technetium",m:98,cat:"transition",pos:79},
+    {n:44,s:"Ru",name:"Ruthenium",m:101.07,cat:"transition",pos:80},
+    {n:45,s:"Rh",name:"Rhodium",m:102.906,cat:"transition",pos:81},
+    {n:46,s:"Pd",name:"Palladium",m:106.42,cat:"transition",pos:82},
+    {n:47,s:"Ag",name:"Silver",m:107.868,cat:"transition",pos:83},
+    {n:48,s:"Cd",name:"Cadmium",m:112.414,cat:"transition",pos:84},
+    {n:49,s:"In",name:"Indium",m:114.818,cat:"post-transition",pos:85},
+    {n:50,s:"Sn",name:"Tin",m:118.71,cat:"post-transition",pos:86},
+    {n:51,s:"Sb",name:"Antimony",m:121.76,cat:"metalloid",pos:87},
+    {n:52,s:"Te",name:"Tellurium",m:127.6,cat:"metalloid",pos:88},
+    {n:53,s:"I",name:"Iodine",m:126.904,cat:"halogen",pos:89},
+    {n:54,s:"Xe",name:"Xenon",m:131.293,cat:"noble",pos:90},
+    {n:55,s:"Cs",name:"Cesium",m:132.905,cat:"alkali",pos:91},
+    {n:56,s:"Ba",name:"Barium",m:137.327,cat:"alkaline",pos:92},
+    {n:57,s:"La",name:"Lanthanum",m:138.905,cat:"lanthanide",pos:93},
+    {n:58,s:"Ce",name:"Cerium",m:140.116,cat:"lanthanide",pos:130},
+    {n:59,s:"Pr",name:"Praseodymium",m:140.908,cat:"lanthanide",pos:131},
+    {n:60,s:"Nd",name:"Neodymium",m:144.242,cat:"lanthanide",pos:132},
+    {n:61,s:"Pm",name:"Promethium",m:145,cat:"lanthanide",pos:133},
+    {n:62,s:"Sm",name:"Samarium",m:150.36,cat:"lanthanide",pos:134},
+    {n:63,s:"Eu",name:"Europium",m:151.964,cat:"lanthanide",pos:135},
+    {n:64,s:"Gd",name:"Gadolinium",m:157.25,cat:"lanthanide",pos:136},
+    {n:65,s:"Tb",name:"Terbium",m:158.925,cat:"lanthanide",pos:137},
+    {n:66,s:"Dy",name:"Dysprosium",m:162.5,cat:"lanthanide",pos:138},
+    {n:67,s:"Ho",name:"Holmium",m:164.93,cat:"lanthanide",pos:139},
+    {n:68,s:"Er",name:"Erbium",m:167.259,cat:"lanthanide",pos:140},
+    {n:69,s:"Tm",name:"Thulium",m:168.934,cat:"lanthanide",pos:141},
+    {n:70,s:"Yb",name:"Ytterbium",m:173.045,cat:"lanthanide",pos:142},
+    {n:71,s:"Lu",name:"Lutetium",m:174.967,cat:"lanthanide",pos:143},
+    {n:72,s:"Hf",name:"Hafnium",m:178.49,cat:"transition",pos:94},
+    {n:73,s:"Ta",name:"Tantalum",m:180.948,cat:"transition",pos:95},
+    {n:74,s:"W",name:"Tungsten",m:183.84,cat:"transition",pos:96},
+    {n:75,s:"Re",name:"Rhenium",m:186.207,cat:"transition",pos:97},
+    {n:76,s:"Os",name:"Osmium",m:190.23,cat:"transition",pos:98},
+    {n:77,s:"Ir",name:"Iridium",m:192.217,cat:"transition",pos:99},
+    {n:78,s:"Pt",name:"Platinum",m:195.084,cat:"transition",pos:100},
+    {n:79,s:"Au",name:"Gold",m:196.967,cat:"transition",pos:101},
+    {n:80,s:"Hg",name:"Mercury",m:200.59,cat:"transition",pos:102},
+    {n:81,s:"Tl",name:"Thallium",m:204.383,cat:"post-transition",pos:103},
+    {n:82,s:"Pb",name:"Lead",m:207.2,cat:"post-transition",pos:104},
+    {n:83,s:"Bi",name:"Bismuth",m:208.98,cat:"post-transition",pos:105},
+    {n:84,s:"Po",name:"Polonium",m:209,cat:"post-transition",pos:106},
+    {n:85,s:"At",name:"Astatine",m:210,cat:"halogen",pos:107},
+    {n:86,s:"Rn",name:"Radon",m:222,cat:"noble",pos:108},
+    {n:87,s:"Fr",name:"Francium",m:223,cat:"alkali",pos:109},
+    {n:88,s:"Ra",name:"Radium",m:226,cat:"alkaline",pos:110},
+    {n:89,s:"Ac",name:"Actinium",m:227,cat:"actinide",pos:111},
+    {n:90,s:"Th",name:"Thorium",m:232.038,cat:"actinide",pos:148},
+    {n:91,s:"Pa",name:"Protactinium",m:231.036,cat:"actinide",pos:149},
+    {n:92,s:"U",name:"Uranium",m:238.029,cat:"actinide",pos:150},
+    {n:93,s:"Np",name:"Neptunium",m:237,cat:"actinide",pos:151},
+    {n:94,s:"Pu",name:"Plutonium",m:244,cat:"actinide",pos:152},
+    {n:95,s:"Am",name:"Americium",m:243,cat:"actinide",pos:153},
+    {n:96,s:"Cm",name:"Curium",m:247,cat:"actinide",pos:154},
+    {n:97,s:"Bk",name:"Berkelium",m:247,cat:"actinide",pos:155},
+    {n:98,s:"Cf",name:"Californium",m:251,cat:"actinide",pos:156},
+    {n:99,s:"Es",name:"Einsteinium",m:252,cat:"actinide",pos:157},
+    {n:100,s:"Fm",name:"Fermium",m:257,cat:"actinide",pos:158},
+    {n:101,s:"Md",name:"Mendelevium",m:258,cat:"actinide",pos:159},
+    {n:102,s:"No",name:"Nobelium",m:259,cat:"actinide",pos:160},
+    {n:103,s:"Lr",name:"Lawrencium",m:262,cat:"actinide",pos:161},
+    {n:104,s:"Rf",name:"Rutherfordium",m:267,cat:"transition",pos:112},
+    {n:105,s:"Db",name:"Dubnium",m:268,cat:"transition",pos:113},
+    {n:106,s:"Sg",name:"Seaborgium",m:271,cat:"transition",pos:114},
+    {n:107,s:"Bh",name:"Bohrium",m:272,cat:"transition",pos:115},
+    {n:108,s:"Hs",name:"Hassium",m:270,cat:"transition",pos:116},
+    {n:109,s:"Mt",name:"Meitnerium",m:276,cat:"transition",pos:117},
+    {n:110,s:"Ds",name:"Darmstadtium",m:281,cat:"transition",pos:118},
+    {n:111,s:"Rg",name:"Roentgenium",m:282,cat:"transition",pos:119},
+    {n:112,s:"Cn",name:"Copernicium",m:285,cat:"transition",pos:120},
+    {n:113,s:"Nh",name:"Nihonium",m:286,cat:"post-transition",pos:121},
+    {n:114,s:"Fl",name:"Flerovium",m:289,cat:"post-transition",pos:122},
+    {n:115,s:"Mc",name:"Moscovium",m:290,cat:"post-transition",pos:123},
+    {n:116,s:"Lv",name:"Livermorium",m:293,cat:"post-transition",pos:124},
+    {n:117,s:"Ts",name:"Tennessine",m:294,cat:"halogen",pos:125},
+    {n:118,s:"Og",name:"Oganesson",m:294,cat:"noble",pos:126}
+];
+
+const table = document.getElementById('table');
+const info = document.getElementById('info');
+const search = document.getElementById('search');
+
+let elementDivs = [];
+
+function renderTable() {
+    table.innerHTML = "";
+    elementDivs = [];
+    
+    for (let i = 1; i <= 162; i++) {
+        const el = elements.find(e => e.pos === i);
+        if (el) {
+            const div = document.createElement('div');
+            div.className = `element ${el.cat}`;
+            div.innerHTML = `
+                <div class="atomic-number">${el.n}</div>
+                <div class="symbol">${el.s}</div>
+                <div class="name">${el.name}</div>
+            `;
+            
+            div.dataset.elementId = el.n;
+            div.dataset.name = el.name.toLowerCase();
+            div.dataset.symbol = el.s.toLowerCase();
+
+            div.addEventListener('mouseenter', () => {
+                info.innerHTML = `
+                    <h2>${el.name} (${el.s})</h2>
+                    <p><strong>Atomic Number:</strong> <span class="highlight">${el.n}</span></p>
+                    <p><strong>Atomic Mass:</strong> <span class="highlight">${el.m}</span></p>
+                    <p><strong>Category:</strong> <span class="highlight">${el.cat.charAt(0).toUpperCase() + el.cat.slice(1)}</span></p>
+                `;
+            });
+            
+            div.addEventListener('click', () => {
+                navigator.clipboard.writeText(`${el.name} (${el.s}) - Atomic Number: ${el.n}`);
+                info.innerHTML = `
+                    <h2>✅ Copied to Clipboard!</h2>
+                    <p><strong>${el.name}</strong> (${el.s}) - Atomic Number: ${el.n}</p>
+                `;
+            });
+            
+            elementDivs.push(div);
+            table.appendChild(div);
+        } else {
+            const empty = document.createElement('div');
+            empty.className = "element empty";
+            table.appendChild(empty);
+        }
+    }
+}
+
+search.addEventListener("input", e => {
+    const query = e.target.value.trim().toLowerCase();
+    
+    elementDivs.forEach(div => {
+        const name = div.dataset.name;
+        const symbol = div.dataset.symbol;
+        
+        if (query === "") {
+            div.classList.remove('active', 'dimmed');
+        } else if (name === query || symbol === query) {
+            div.classList.add('active');
+            div.classList.remove('dimmed');
+        } else {
+            div.classList.remove('active');
+            div.classList.add('dimmed');
+        }
+    });
+    
+    if (query === "") {
+        info.innerHTML = `
+            <h2>⚛️ Explore the Elements</h2>
+            <p>Search to highlight a specific element • Hover to preview details • Click to copy</p>
+        `;
+    }
+});
+
+renderTable();
+</script>
+</body>
+</html>
